@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wardrobe Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>Wardrobe Management Chatbot</h3>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-message bot-message">Hi! I'm your wardrobe assistant. Please answer the following questions:</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="user-input" placeholder="Type your answer here..." autofocus>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        let conversationStep = 0;
+        let user_data = {
+            name: "",
+            age: "",
+            gender: "",
+            working_professional: "",
+            number_of_clothes: "",
+            wardrobe_size: "",
+            number_of_sections: "",
+            clothes_type: ""
+        };
+
+        const questions = [
+            "What's your name?",
+            "How old are you?",
+            "What is your gender? (Male/Female/Other)",
+            "Are you a working professional? (Yes/No)",
+            "How many clothes do you have?",
+            "What is the size of your wardrobe (in square feet)?",
+            "How many sections does your wardrobe have?",
+            "What type of clothes do you mostly have? (Hanging, Folded, Accessories, Shoes, etc.)"
+        ];
+
+        function sendMessage() {
+            let userInput = document.getElementById('user-input').value;
+            if (userInput === "") return;
+
+            // Display user's message
+            let chatBody = document.getElementById('chat-body');
+            chatBody.innerHTML += `<div class="chat-message user-message">${userInput}</div>`;
+            document.getElementById('user-input').value = "";  // Clear input field
+
+            // Save response to user_data
+            if (conversationStep === 0) {
+                user_data.name = userInput;
+            } else if (conversationStep === 1) {
+                user_data.age = userInput;
+            } else if (conversationStep === 2) {
+                user_data.gender = userInput;
+            } else if (conversationStep === 3) {
+                user_data.working_professional = userInput;
+            } else if (conversationStep === 4) {
+                user_data.number_of_clothes = userInput;
+            } else if (conversationStep === 5) {
+                user_data.wardrobe_size = userInput;
+            } else if (conversationStep === 6) {
+                user_data.number_of_sections = userInput;
+            } else if (conversationStep === 7) {
+                user_data.clothes_type = userInput;
+
+                // Send data to the server
+                fetch('/wardrobe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(user_data),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    chatBody.innerHTML += `<div class="chat-message bot-message">${data.advice}</div>`;
+                })
+                .catch(error => console.error('Error:', error));
+
+                return;  // Exit the function after last question
+            }
+
+            // Ask the next question
+            conversationStep++;
+            chatBody.innerHTML += `<div class="chat-message bot-message">${questions[conversationStep]}</div>`;
+        }
+
+        // Start the conversation
+        document.getElementById('chat-body').innerHTML += `<div class="chat-message bot-message">${questions[0]}</div>`;
+    </script>
+</body>
+</html>
